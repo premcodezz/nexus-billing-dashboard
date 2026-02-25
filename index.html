@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Premium Billing Dashboard with Scanner and Google Sheets Integration">
+    <title>Nexus Billing ✨</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- html2pdf for generating PDF receipts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <div id="dashboard-app" class="app-container">
+        <!-- Sidebar / Setup Pangel -->
+        <aside class="glass-panel sidebar">
+            <div class="brand">
+                <div class="logo-icon">✨</div>
+                <h1>Nexus Billing</h1>
+            </div>
+
+            <section class="setup-section">
+                <h2>1. Database Connection</h2>
+                <div class="input-group">
+                    <label for="sheet-url">Google Sheet URL</label>
+                    <input type="url" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/...">
+                    <p class="helper-text">Sheet must be set to "Anyone with the link can view"<br>Expected cols: ISBN,
+                        ProductName, Price</p>
+                </div>
+                <div class="input-group">
+                    <label for="script-url" style="display:none;">Google Apps Script URL</label>
+                    <!-- Hardcoded internally now, field hidden -->
+                </div>
+                <button id="btn-sync" class="btn primary-btn">
+                    <span class="btn-text">Sync Database</span>
+                    <span class="loader hidden"></span>
+                </button>
+                <div id="sync-status" class="status-indicator">
+                    <div class="dot disconnected"></div>
+                    <span>Disconnected</span>
+                </div>
+            </section>
+
+            <section class="scanner-section">
+                <h2>2. Scanner Input</h2>
+                <div class="input-group">
+                    <label for="scanner-input">Scan Barcode / Enter ISBN</label>
+                    <input type="text" id="scanner-input" placeholder="Ready to scan..." disabled>
+                </div>
+            </section>
+        </aside>
+
+        <!-- Main Cart Area -->
+        <main class="glass-panel main-content">
+            <header class="cart-header">
+                <h2>Current Cart</h2>
+                <div class="header-actions">
+                    <button id="btn-clear" class="btn secondary-btn" disabled>Clear Cart</button>
+                </div>
+            </header>
+
+            <div class="table-container">
+                <table id="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>ISBN</th>
+                            <th class="align-right">Qty</th>
+                            <th class="align-right">Price</th>
+                            <th class="align-right">Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cart-body">
+                        <!-- Empty state -->
+                        <tr class="empty-state">
+                            <td colspan="6">
+                                <div class="empty-cart-message">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="9" cy="21" r="1"></circle>
+                                        <circle cx="20" cy="21" r="1"></circle>
+                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6">
+                                        </path>
+                                    </svg>
+                                    <p>Cart is empty. Scan an item to begin.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="cart-footer">
+                <div class="checkout-grid">
+                    <div class="customer-info">
+                        <label for="customer-phone">Customer WhatsApp Number (Optional)</label>
+                        <div class="phone-input-wrapper">
+                            <span>+</span>
+                            <input type="tel" id="customer-phone" placeholder="919876543210"
+                                title="Include country code without '+'">
+                        </div>
+                    </div>
+                    <div class="totals">
+                        <div class="totals-row">
+                            <span>Subtotal</span>
+                            <span id="subtotal-val">$0.00</span>
+                        </div>
+                        <div class="totals-row grand-total">
+                            <span>Total</span>
+                            <span id="total-val">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-checkout" class="btn success-btn" disabled>
+                    <span id="checkout-btn-text">Complete & Print Receipt</span>
+                    <span class="loader hidden"></span>
+                </button>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Hidden Receipt Section (Only visible when printing) -->
+    <div id="receipt-container" class="receipt-print-area">
+        <div class="receipt-header">
+            <h2>NEXUS STORE</h2>
+            <p>123 Fake Street, Tech City</p>
+            <p>Tel: 555-0192</p>
+            <p class="receipt-date" id="receipt-date"></p>
+        </div>
+
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>QTY</th>
+                    <th>ITEM</th>
+                    <th class="align-right">AMT</th>
+                </tr>
+            </thead>
+            <tbody id="receipt-items">
+                <!-- Receipt items injected here -->
+            </tbody>
+        </table>
+
+        <div class="receipt-totals">
+            <div class="receipt-row">
+                <span>TOTAL:</span>
+                <span id="receipt-total-val">$0.00</span>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            <p>Thank you for your purchase!</p>
+            <p>Please come again.</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

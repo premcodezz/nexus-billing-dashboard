@@ -1,0 +1,609 @@
+:root {
+    --bg-color: #0d1117;
+    --panel-bg: rgba(22, 27, 34, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --accent-color: #58a6ff;
+    --accent-hover: #318bf8;
+    --success-color: #2ea043;
+    --success-hover: #238636;
+    --danger-color: #f85149;
+    --danger-hover: #da3633;
+    --glass-blur: blur(16px);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(circle at 15% 50%, rgba(88, 166, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 85% 30%, rgba(46, 160, 67, 0.06) 0%, transparent 50%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+/* App Layout */
+.app-container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1400px;
+    height: 90vh;
+}
+
+/* Glass Panels */
+.glass-panel {
+    background: var(--panel-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar Elements */
+.sidebar {
+    gap: 2.5rem;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-icon {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--accent-color), #bc8cff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.brand h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+section h2 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    color: var(--text-primary);
+    font-family: ' आउटफिट', sans-serif;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+}
+
+input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.helper-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Buttons */
+.btn {
+    width: 100%;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.primary-btn {
+    background: var(--accent-color);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(88, 166, 255, 0.3);
+}
+
+.primary-btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(88, 166, 255, 0.4);
+}
+
+.success-btn {
+    background: var(--success-color);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(46, 160, 67, 0.3);
+}
+
+.success-btn:hover:not(:disabled) {
+    background: var(--success-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 160, 67, 0.4);
+}
+
+.secondary-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    width: auto;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.secondary-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.4rem;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.icon-btn:hover {
+    color: var(--danger-color);
+    background: rgba(248, 81, 73, 0.1);
+}
+
+/* Status Indicator */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 1rem;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.disconnected {
+    background: var(--danger-color);
+    box-shadow: 0 0 8px var(--danger-color);
+}
+
+.connected {
+    background: var(--success-color);
+    box-shadow: 0 0 8px var(--success-color);
+}
+
+/* Main Content (Cart) */
+.main-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cart-header h2 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+/* Table */
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar */
+.table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    background: var(--panel-bg);
+    backdrop-filter: var(--glass-blur);
+    z-index: 10;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 1rem;
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.align-right {
+    text-align: right;
+}
+
+.item-name {
+    font-weight: 500;
+}
+
+.item-isbn {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.item-qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.2rem 0.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.qty-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 1rem;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.qty-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.item-price,
+.item-total {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Empty State */
+.empty-state td {
+    border: none;
+    padding: 4rem 2rem;
+}
+
+.empty-cart-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+/* Footer Totals */
+.cart-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.totals {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-end;
+}
+
+.totals-row {
+    display: flex;
+    justify-content: space-between;
+    width: 250px;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+.checkout-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.customer-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.customer-info label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.phone-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding-left: 1rem;
+    transition: var(--transition);
+}
+
+.phone-input-wrapper:focus-within {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 3px rgba(46, 160, 67, 0.2);
+}
+
+.phone-input-wrapper span {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.phone-input-wrapper input {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.phone-input-wrapper input:focus {
+    border: none;
+    box-shadow: none;
+}
+
+.grand-total {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border-color);
+}
+
+.grand-total span:last-child {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--success-color);
+}
+
+/* Animations */
+@keyframes rowFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cart-item-row {
+    animation: rowFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.highlight {
+    animation: highlightFlash 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes highlightFlash {
+    0% {
+        background: rgba(88, 166, 255, 0.2);
+    }
+
+    100% {
+        background: transparent;
+    }
+}
+
+/* Loader */
+.loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+.loader.hidden {
+    display: none;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* -------------------------------------------
+   Thermal Printer Styles (80mm width) 
+   Hidden by default, visible only on print
+   ------------------------------------------- */
+.receipt-print-area {
+    display: none;
+    background: #fff;
+    color: #000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 0;
+    width: 80mm;
+    /* Standard thermal printer width */
+    margin: 0 auto;
+}
+
+@media print {
+    body {
+        background: #fff;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Hide the entire app UI */
+    .app-container {
+        display: none !important;
+    }
+
+    /* Show only standard black/white thermal receipt format */
+    .receipt-print-area {
+        display: block;
+        width: 100%;
+        max-width: 80mm;
+        margin: 0;
+        padding: 5mm;
+    }
+
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 5mm;
+        border-bottom: 1px dashed #000;
+        padding-bottom: 3mm;
+    }
+
+    .receipt-header h2 {
+        font-size: 18px;
+        margin: 0 0 2mm 0;
+    }
+
+    .receipt-header p {
+        margin: 0 0 1mm 0;
+        font-size: 10px;
+    }
+
+    .receipt-table {
+        width: 100%;
+        margin-bottom: 3mm;
+    }
+
+    .receipt-table th {
+        border-bottom: 1px dashed #000;
+        padding: 2mm 0;
+        font-size: 10px;
+        color: #000;
+        background: none;
+    }
+
+    .receipt-table td {
+        padding: 2mm 0;
+        border: none;
+        font-size: 10px;
+    }
+
+    .receipt-totals {
+        border-top: 1px dashed #000;
+        padding-top: 3mm;
+        margin-bottom: 5mm;
+    }
+
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 14px;
+        padding: 1mm 0;
+    }
+
+    .receipt-footer {
+        text-align: center;
+        border-top: 1px dashed #000;
+        padding-top: 3mm;
+        font-size: 10px;
+    }
+
+    @page {
+        margin: 0;
+        size: 80mm auto;
+        /* Thermal roll paper size */
+    }
+}
