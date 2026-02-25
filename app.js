@@ -300,93 +300,77 @@ btnCheckout.addEventListener('click', () => {
 
     receiptTotalVal.textContent = formatMoney(tTotal);
 
-    // Flow: If a phone number is provided, generate the digital PDF and open WhatsApp FIRST
-    if (phoneInput) {
-        btnText.classList.add('hidden');
-        loader.classList.remove('hidden');
-        btnCheckout.disabled = true;
-
-        const receiptContainer = document.getElementById('receipt-container');
-        receiptContainer.style.display = 'block';
-
-        const filename = `Nexus_Store_Bill_${Date.now()}.pdf`;
-        const opt = {
-            margin: 5,
-            filename: filename,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' }
-        };
-
-        // Generate PDF, convert to base64, upload to Drive, then WhatsApp.
-        html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
-            receiptContainer.style.display = ''; // reset to normal hidden state
-
-            // Prepare the payload for Apps Script
-            const payload = JSON.stringify({
-                base64: pdfBase64,
-                filename: filename,
-                folderId: '15QEZhWbjviHTUYW5XUtvP8E-i4xPtC8e'
-            });
-
-            // Send simple POST request without custom headers to avoid CORS preflight entirely.
-            // Google Apps Script will parse this payload in e.postData.contents.
-            return fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                body: payload
-            });
-        })
-            .then(response => {
-                // Apps script often responds with a redirect (302) on POST before giving JSON, 
-                // but the fetch API transparently follows it. We just need to parse the final response.
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(result => {
-                if (result.status === 'success') {
-                    // Result MUST have .url from our script
-                    console.log("Upload Success! URL:", result.url);
-
-                    const cleanPhone = phoneInput.replace(/\D/g, '');
-                    const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
-                    const waLink = `https://wa.me/${cleanPhone}?text=${message}`;
-
-                    // 1. Open WhatsApp with link
-                    window.open(waLink, '_blank');
-
-                    // 2. Ask to print physically AFTER WhatsApp link is sent
-                    // Small timeout to allow the WA window to open properly before showing the alert blocker
-                    setTimeout(() => {
-                        const wantToPrint = confirm("WhatsApp message created!\n\nDo you also want to print a physical copy of this bill?");
-                        if (wantToPrint) {
-                            window.print();
-                        }
-                    }, 500);
-
-                } else {
-                    throw new Error(result.message || 'Unknown error during upload');
-                }
-            })
-            .catch(error => {
-                console.error("Upload Error:", error);
-                alert(`Failed to upload the bill to Google Drive. Error: ${error.message}\nCheck the console for details.`);
-
-                // Fallback: simply print physically if WhatsApp upload fails
-                if (confirm("Could not send to WhatsApp. Do you want to print the physical bill instead?")) {
-                    window.print();
-                }
-            })
-            .finally(() => {
-                btnText.classList.remove('hidden');
-                loader.classList.add('hidden');
-                btnCheckout.disabled = false;
-            });
-
-    } else {
-        // Flow: No Phone Number Provided
-        // Just print physically
-        window.print();
+    // Require a phone number to generate the digital PDF and open WhatsApp
+    if (!phoneInput) {
+        alert("Please enter a Customer WhatsApp Number to generate and share the digital bill.");
+        return;
     }
+
+    btnText.classList.add('hidden');
+    loader.classList.remove('hidden');
+    btnCheckout.disabled = true;
+
+    const receiptContainer = document.getElementById('receipt-container');
+    receiptContainer.style.display = 'block';
+
+    const filename = `Nexus_Store_Bill_${Date.now()}.pdf`;
+    const opt = {
+        margin: 5,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' }
+    };
+
+    // Generate PDF, convert to base64, upload to Drive, then WhatsApp.
+    html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
+        receiptContainer.style.display = ''; // reset to normal hidden state
+
+        // Prepare the payload for Apps Script
+        const payload = JSON.stringify({
+            base64: pdfBase64,
+            filename: filename,
+            folderId: '15QEZhWbjviHTUYW5XUtvP8E-i4xPtC8e'
+        });
+
+        // Send simple POST request without custom headers to avoid CORS preflight entirely.
+        // Google Apps Script will parse this payload in e.postData.contents.
+        return fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: payload
+        });
+    })
+        .then(response => {
+            // Apps script often responds with a redirect (302) on POST before giving JSON, 
+            // but the fetch API transparently follows it. We just need to parse the final response.
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(result => {
+            if (result.status === 'success') {
+                // Result MUST have .url from our script
+                console.log("Upload Success! URL:", result.url);
+
+                const cleanPhone = phoneInput.replace(/\D/g, '');
+                const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
+                const waLink = `https://wa.me/${cleanPhone}?text=${message}`;
+
+                // 1. Open WhatsApp with link
+                window.open(waLink, '_blank');
+
+            } else {
+                throw new Error(result.message || 'Unknown error during upload');
+            }
+        })
+        .catch(error => {
+            console.error("Upload Error:", error);
+            alert(`Failed to upload the bill to Google Drive. Error: ${error.message}\nCheck the console for details.`);
+        })
+        .finally(() => {
+            btnText.classList.remove('hidden');
+            loader.classList.add('hidden');
+            btnCheckout.disabled = false;
+        });
 });
