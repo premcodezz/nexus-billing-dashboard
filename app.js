@@ -171,6 +171,28 @@ scannerInput.addEventListener('keydown', (e) => {
 let lastScannedIsbn = '';
 let lastScanTime = 0;
 
+// Helper to generate a short 'beep' sound using the Web Audio API
+function playBeep() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800; // 800Hz beep
+
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Low volume
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.1); // 100ms beep
+    } catch (e) {
+        console.log("Audio not supported or blocked", e);
+    }
+}
+
 function processScan(isbn) {
     const now = Date.now();
 
@@ -188,10 +210,12 @@ function processScan(isbn) {
     const product = database.get(isbn);
     if (product) {
         addToCart(product);
+        playBeep(); // Audio feedback for success
         scannerInput.style.borderColor = 'var(--success-color)';
         setTimeout(() => scannerInput.style.borderColor = 'var(--border-color)', 500);
     } else {
         scannerInput.style.borderColor = 'var(--danger-color)';
+        // Optional error beep
         alert(`Scanned barcode "${isbn}" but could not find it in the Database.\n\nPlease check the Google Sheet.`);
         setTimeout(() => scannerInput.style.borderColor = 'var(--border-color)', 500);
     }
@@ -242,16 +266,10 @@ btnCameraScan.addEventListener('click', () => {
 
         html5QrCode.start(cameraConfig, config,
             (decodedText, decodedResult) => {
-                // Success Callback: Just put the text in the box and stop scanning.
+                // Success Callback: Continuous scanning mode
                 console.log(`Scan result: ${decodedText}`);
-
-                if (html5QrCode) {
-                    html5QrCode.stop().then(() => {
-                        resetCameraUI();
-                        scannerInput.value = decodedText.toLowerCase();
-                        // We DO NOT auto-submit or validate here as requested by the user.
-                    }).catch(err => console.error(err));
-                }
+                processScan(decodedText.toLowerCase());
+                // Notice: We NO LONGER call .stop() here, so the camera stays open
             },
             (errorMessage) => {
                 // Parse errors constantly thrown when no barcode is in front of the camera
@@ -267,12 +285,7 @@ btnCameraScan.addEventListener('click', () => {
                 console.warn("Rear camera not found, trying any available camera...");
                 html5QrCode.start({ facingMode: "user" }, config,
                     (txt) => {
-                        if (html5QrCode) {
-                            html5QrCode.stop().then(() => {
-                                resetCameraUI();
-                                scannerInput.value = txt.toLowerCase();
-                            }).catch(err => console.error(err));
-                        }
+                        processScan(txt.toLowerCase());
                     },
                     (e) => { }
                 ).then(() => {
