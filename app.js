@@ -480,14 +480,20 @@ btnCheckout.addEventListener('click', () => {
 
     const filename = `Nexus_Store_Bill_${Date.now()}.pdf`;
     const opt = {
-        margin: 5,
+        margin: [2, 0, 0, 0],
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            scrollY: 0,
+            scrollX: 0,
+            windowWidth: 800
+        },
         jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' }
     };
 
-    // Small timeout to allow the browser to fully render the display:block before snapshotting
+    // Timeout to allow the browser to fully render the display:block before snapshotting
     setTimeout(() => {
         // Generate PDF, convert to base64, upload to Drive, then redirect the WhatsApp Tab.
         html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
@@ -540,5 +546,5 @@ btnCheckout.addEventListener('click', () => {
                 loader.classList.add('hidden');
                 btnCheckout.disabled = false;
             });
-    }, 100);
+    }, 500);
 });
