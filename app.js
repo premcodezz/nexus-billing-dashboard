@@ -614,8 +614,10 @@ btnCheckout.addEventListener('click', () => {
                 console.log("Upload Success! URL:", result.url);
 
                 const cleanPhone = phoneInput.replace(/\D/g, '');
+                // Automatically append the 91 country code if the user provided the standard 10 digit number
+                const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
                 const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
-                const waLink = `https://wa.me/${cleanPhone}?text=${message}`;
+                const waLink = `https://wa.me/${waPhone}?text=${message}`;
 
                 // 1. Open WhatsApp with link
                 window.open(waLink, '_blank');
