@@ -613,11 +613,18 @@ btnCheckout.addEventListener('click', () => {
                 // Result MUST have .url from our script
                 console.log("Upload Success! URL:", result.url);
 
-                const cleanPhone = phoneInput.replace(/\D/g, '');
-                // Automatically append the 91 country code if the user provided the standard 10 digit number
-                const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+                // Strip all non-digits
+                let cleanPhone = phoneInput.replace(/\D/g, '');
+
+                // If the user mistakenly included the country code '91' or '0' at the start, slice it so we only get the core 10 digits
+                if (cleanPhone.length > 10) {
+                    cleanPhone = cleanPhone.slice(-10);
+                }
+
+                // Force India country code
+                const waPhone = '91' + cleanPhone;
                 const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
-                const waLink = `https://wa.me/${waPhone}?text=${message}`;
+                const waLink = `https://api.whatsapp.com/send/?phone=${waPhone}&text=${message}`;
 
                 // 1. Open WhatsApp with link
                 window.open(waLink, '_blank');
