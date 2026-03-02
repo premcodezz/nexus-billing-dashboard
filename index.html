@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="style.css">
     <!-- html2pdf for generating PDF receipts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- html5-qrcode for camera barcode scanning -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
@@ -50,8 +52,17 @@
             <section class="scanner-section">
                 <h2>2. Scanner Input</h2>
                 <div class="input-group">
-                    <label for="scanner-input">Scan Barcode / Enter ISBN</label>
+                    <label for="scanner-input">Manual Entry / USB Scanner</label>
                     <input type="text" id="scanner-input" placeholder="Ready to scan..." disabled>
+                </div>
+                
+                <div class="camera-scanner-wrapper">
+                    <button id="btn-camera-scan" class="btn secondary-btn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        <span id="camera-btn-text">Scan with Camera</span>
+                    </button>
+                    <!-- Container for the live video feed -->
+                    <div id="reader" style="width: 100%; display: none; margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);"></div>
                 </div>
             </section>
         </aside>

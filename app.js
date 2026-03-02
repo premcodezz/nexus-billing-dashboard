@@ -7,6 +7,8 @@ const syncStatusDot = document.querySelector('#sync-status .dot');
 // Permanent App Config
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8geERj5n0MwrPgwa69G7p5giw19T9HKfRyyRD1Amf0fbwMsk8MeceeVzxlO6EvDo/exec";
 const scannerInput = document.getElementById('scanner-input');
+const btnCameraScan = document.getElementById('btn-camera-scan');
+const cameraBtnText = document.getElementById('camera-btn-text');
 const cartBody = document.getElementById('cart-body');
 const btnClear = document.getElementById('btn-clear');
 const btnCheckout = document.getElementById('btn-checkout');
@@ -76,6 +78,7 @@ window.gvizCallback = function (data) {
         syncStatusDot.classList.add('connected');
         scannerInput.disabled = false;
         scannerInput.focus();
+        btnCameraScan.disabled = false;
 
     } catch (error) {
         console.error(error);
@@ -93,6 +96,12 @@ function setDisconnectedState() {
     syncStatusDot.classList.add('disconnected');
     syncStatusDot.classList.remove('connected');
     scannerInput.disabled = true;
+    btnCameraScan.disabled = true;
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear();
+        isScanning = false;
+        cameraBtnText.textContent = "Scan with Camera";
+    }
 }
 
 /**
@@ -152,14 +161,66 @@ scannerInput.addEventListener('keydown', (e) => {
 
         if (!isbn) return;
 
-        const product = database.get(isbn);
-        if (product) {
-            addToCart(product);
-        } else {
-            // Optional: Show brief toaster/error or just flash red
-            scannerInput.style.borderColor = 'var(--danger-color)';
-            setTimeout(() => { scannerInput.style.borderColor = ''; }, 500);
+        processScan(isbn);
+    }
+});
+
+function processScan(isbn) {
+    const product = database.get(isbn);
+    if (product) {
+        addToCart(product);
+        // Provide audio/visual feedback if needed here
+    } else {
+        // Optional: Show brief toaster/error or just flash red
+        scannerInput.style.borderColor = 'var(--danger-color)';
+        setTimeout(() => scannerInput.style.borderColor = 'var(--border-color)', 500);
+    }
+}
+
+/**
+ * Camera Scanner Integration (html5-qrcode)
+ */
+let html5QrcodeScanner = null;
+let isScanning = false;
+
+btnCameraScan.addEventListener('click', () => {
+    if (isScanning) {
+        // Stop scanning
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear().then(() => {
+                isScanning = false;
+                cameraBtnText.textContent = "Scan with Camera";
+                btnCameraScan.style.borderColor = "var(--border-color)";
+                btnCameraScan.style.color = "var(--text-primary)";
+            }).catch(err => {
+                console.error("Failed to clear scanner", err);
+            });
         }
+    } else {
+        // Start scanning
+        btnCameraScan.style.borderColor = "var(--success-color)";
+        btnCameraScan.style.color = "var(--success-color)";
+        cameraBtnText.textContent = "Stop Camera";
+        isScanning = true;
+
+        if (!html5QrcodeScanner) {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: { width: 250, height: 150 }, disableFlip: false },
+                false);
+        }
+
+        html5QrcodeScanner.render((decodedText, decodedResult) => {
+            // Success Callback
+            console.log(`Scan result: ${decodedText}`);
+
+            // html5-qrcode scans fast, adding a small timeout/debounce might be needed if users scan duplicate items too quickly,
+            // but for a POS, aggressive cart-adding is usually desired.
+            processScan(decodedText.toLowerCase());
+
+        }, (errorMessage) => {
+            // Ignored, continuous scanning throws errors constantly as it searches for shapes
+        });
     }
 });
 
@@ -310,6 +371,17 @@ btnCheckout.addEventListener('click', () => {
     loader.classList.remove('hidden');
     btnCheckout.disabled = true;
 
+    // WORKAROUND FOR MOBILE POPUP BLOCKERS:
+    // Mobile browsers (Safari/Chrome) aggressively block `window.open` if it occurs 
+    // *after* an asynchronous callback (like waiting for a fetch/upload to finish).
+    // The solution is to open a blank tab synchronously right here on the trusted click event, 
+    // keep a reference to it, and redirect it later.
+    const whatsappTab = window.open('about:blank', '_blank');
+    if (whatsappTab) {
+        // Optional: show a loading message in the new tab
+        whatsappTab.document.write('<h2>Generating bill and connecting to WhatsApp...</h2>');
+    }
+
     const receiptContainer = document.getElementById('receipt-container');
     receiptContainer.style.display = 'block';
 
@@ -322,7 +394,7 @@ btnCheckout.addEventListener('click', () => {
         jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' }
     };
 
-    // Generate PDF, convert to base64, upload to Drive, then WhatsApp.
+    // Generate PDF, convert to base64, upload to Drive, then redirect the WhatsApp Tab.
     html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
         receiptContainer.style.display = ''; // reset to normal hidden state
 
@@ -357,8 +429,13 @@ btnCheckout.addEventListener('click', () => {
                 const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
                 const waLink = `https://wa.me/${cleanPhone}?text=${message}`;
 
-                // 1. Open WhatsApp with link
-                window.open(waLink, '_blank');
+                // 1. Redirect the previously opened tab to WhatsApp
+                if (whatsappTab) {
+                    whatsappTab.location.href = waLink;
+                } else {
+                    // Fallback if the popup was completely blocked initially
+                    window.open(waLink, '_blank');
+                }
 
             } else {
                 throw new Error(result.message || 'Unknown error during upload');
@@ -367,6 +444,11 @@ btnCheckout.addEventListener('click', () => {
         .catch(error => {
             console.error("Upload Error:", error);
             alert(`Failed to upload the bill to Google Drive. Error: ${error.message}\nCheck the console for details.`);
+
+            // Close the empty tab if an error occurred to avoid leaving the user with a blank page
+            if (whatsappTab) {
+                whatsappTab.close();
+            }
         })
         .finally(() => {
             btnText.classList.remove('hidden');

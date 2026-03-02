@@ -91,6 +91,39 @@ section h2 {
     font-weight: 600;
 }
 
+.scanner-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.camera-scanner-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* html5-qrcode overrides to fit theme */
+#reader {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+#reader button {
+    background: var(--accent-color) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 5px 10px !important;
+    margin: 5px !important;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+#reader a {
+    color: var(--accent-color) !important;
+}
+
 .input-group {
     display: flex;
     flex-direction: column;
@@ -605,5 +638,78 @@ tr:hover td {
         margin: 0;
         size: 80mm auto;
         /* Thermal roll paper size */
+    }
+}
+
+/* -------------------------------------------
+   Mobile Responsiveness
+   ------------------------------------------- */
+@media (max-width: 900px) {
+    .app-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        height: auto;
+        gap: 1.5rem;
+    }
+
+    .sidebar {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #cart-table th,
+    #cart-table td {
+        padding: 0.8rem 0.5rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .item-name {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .checkout-grid {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .totals {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .totals-row {
+        width: 100%;
+    }
+
+    .btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .customer-info {
+        width: 100%;
+    }
+
+    .phone-input-wrapper input {
+        width: 100%;
     }
 }
