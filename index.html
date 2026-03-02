@@ -55,14 +55,21 @@
                     <label for="scanner-input">Manual Entry / USB Scanner</label>
                     <input type="text" id="scanner-input" placeholder="Ready to scan..." disabled>
                 </div>
-                
+
                 <div class="camera-scanner-wrapper">
                     <button id="btn-camera-scan" class="btn secondary-btn" disabled>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                            </path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
                         <span id="camera-btn-text">Scan with Camera</span>
                     </button>
                     <!-- Container for the live video feed -->
-                    <div id="reader" style="width: 100%; display: none; margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);"></div>
+                    <div id="reader"
+                        style="width: 100%; display: none; margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);">
+                    </div>
                 </div>
             </section>
         </aside>
@@ -140,18 +147,24 @@
     <!-- Hidden Receipt Section (Only visible when printing) -->
     <div id="receipt-container" class="receipt-print-area">
         <div class="receipt-header">
-            <h2>NEXUS STORE</h2>
-            <p>123 Fake Street, Tech City</p>
-            <p>Tel: 555-0192</p>
-            <p class="receipt-date" id="receipt-date"></p>
+            <div class="receipt-title">THE COFFEE HOUSE</div>
+            <div>123 Tech Avenue, Silicon Valley</div>
+            <div>Tel: +1 555-0199</div>
+            <div class="receipt-divider"></div>
+            <div class="receipt-bold-small">RECEIPT: <span id="receipt-id">#8842</span></div>
+            <div class="receipt-datetime">
+                <span>Date: <span id="receipt-date-val">02/03/2026</span></span>
+                <span>Time: <span id="receipt-time-val">15:30</span></span>
+            </div>
+            <div class="receipt-divider"></div>
         </div>
 
         <table class="receipt-table">
             <thead>
                 <tr>
-                    <th>QTY</th>
-                    <th>ITEM</th>
-                    <th class="align-right">AMT</th>
+                    <th class="col-item">Item</th>
+                    <th class="col-qty">Qty</th>
+                    <th class="col-price">Price</th>
                 </tr>
             </thead>
             <tbody id="receipt-items">
@@ -160,15 +173,27 @@
         </table>
 
         <div class="receipt-totals">
-            <div class="receipt-row">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span id="receipt-subtotal-val">$0.00</span>
+            </div>
+            <div class="total-row">
+                <span>Tax (10%):</span>
+                <span id="receipt-tax-val">$0.00</span>
+            </div>
+            <div class="total-row grand-total">
                 <span>TOTAL:</span>
                 <span id="receipt-total-val">$0.00</span>
             </div>
         </div>
 
+        <div class="receipt-divider" style="margin-top: 5mm;"></div>
+
         <div class="receipt-footer">
-            <p>Thank you for your purchase!</p>
-            <p>Please come again.</p>
+            <div class="receipt-small">Thank you for your visit!</div>
+            <div>Follow us on IG: @TheCoffeeHouse</div>
+            <div class="qr-placeholder"></div>
+            <div class="receipt-tiny">Scan for Loyalty Points</div>
         </div>
     </div>
 

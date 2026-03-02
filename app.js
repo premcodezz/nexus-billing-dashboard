@@ -428,25 +428,40 @@ btnCheckout.addEventListener('click', () => {
     const loader = btnCheckout.querySelector('.loader');
 
     // Populate Receipt
+    // Populate Receipt matching LaTeX Layout
     const now = new Date();
-    receiptDate.textContent = now.toLocaleString();
+    document.getElementById('receipt-date-val').textContent = now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    document.getElementById('receipt-time-val').textContent = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+    document.getElementById('receipt-id').textContent = '#' + Math.floor(1000 + Math.random() * 9000);
 
+    const receiptItems = document.getElementById('receipt-items');
     receiptItems.innerHTML = '';
-    let tTotal = 0;
+    let tSubtotal = 0;
 
-    cart.forEach(item => {
+    cart.forEach((item, index) => {
         const itemTotal = item.price * item.qty;
-        tTotal += itemTotal;
+        tSubtotal += itemTotal;
         const tr = document.createElement('tr');
+
+        // Add a bottom border to the last item to simulate the midrule
+        if (index === cart.length - 1) {
+            tr.style.borderBottom = "1px solid #000";
+        }
+
         tr.innerHTML = `
+            <td class="col-item">${item.name.substring(0, 16)}</td>
             <td>${item.qty}</td>
-            <td>${item.name.substring(0, 16)}</td>
-            <td class="align-right">${formatMoney(itemTotal)}</td>
+            <td>${formatMoney(itemTotal)}</td>
         `;
         receiptItems.appendChild(tr);
     });
 
-    receiptTotalVal.textContent = formatMoney(tTotal);
+    const tTax = tSubtotal * 0.10; // 10% tax as per LaTeX
+    const tTotal = tSubtotal + tTax;
+
+    document.getElementById('receipt-subtotal-val').textContent = formatMoney(tSubtotal);
+    document.getElementById('receipt-tax-val').textContent = formatMoney(tTax);
+    document.getElementById('receipt-total-val').textContent = formatMoney(tTotal);
 
     // Require a phone number to generate the digital PDF and open WhatsApp
     if (!phoneInput) {
