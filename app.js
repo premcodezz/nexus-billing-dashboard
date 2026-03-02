@@ -348,7 +348,7 @@ function removeItem(isbn) {
 }
 
 function formatMoney(amount) {
-    return '$' + parseFloat(amount).toFixed(2);
+    return 'Rs.' + parseFloat(amount).toFixed(2);
 }
 
 function renderCart() {
@@ -369,8 +369,8 @@ function renderCart() {
                 </div>
             </td>
         </tr>`;
-        subtotalVal.textContent = '$0.00';
-        totalVal.textContent = '$0.00';
+        subtotalVal.textContent = 'Rs.0.00';
+        totalVal.textContent = 'Rs.0.00';
         return;
     }
 
@@ -490,14 +490,20 @@ btnCheckout.addEventListener('click', () => {
     // Header
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text("THE COFFEE HOUSE", 40, y, { align: "center" });
+    doc.text("999 Home foods", 40, y, { align: "center" });
     y += 5;
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text("123 Tech Avenue, Silicon Valley", 40, y, { align: "center" });
+    doc.setFontSize(9);
+    doc.text("171/1a trichi main road", 40, y, { align: "center" });
     y += 4;
-    doc.text("Tel: +1 555-0199", 40, y, { align: "center" });
+    doc.text("Chennai 600062", 40, y, { align: "center" });
+    y += 4;
+    doc.text("Tamil Nadu", 40, y, { align: "center" });
+    y += 4;
+    doc.text("India", 40, y, { align: "center" });
+    y += 4;
+    doc.text("Tel: 7092173773", 40, y, { align: "center" });
     y += 4;
 
     // Draw Divider
@@ -565,15 +571,6 @@ btnCheckout.addEventListener('click', () => {
     doc.setFontSize(9);
     doc.text("Thank you for your visit!", 40, y, { align: "center" });
     y += 4;
-    doc.text("Follow us on IG: @TheCoffeeHouse", 40, y, { align: "center" });
-    y += 6;
-
-    // "QR Code" box proxy
-    doc.rect(32.5, y, 15, 15);
-    y += 18;
-
-    doc.setFontSize(7);
-    doc.text("Scan for Loyalty Points", 40, y, { align: "center" });
 
     // 2. Render synchronous document 
     const pdfBase64 = doc.output('datauristring');
