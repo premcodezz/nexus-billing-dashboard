@@ -474,7 +474,6 @@ btnCheckout.addEventListener('click', () => {
     btnCheckout.disabled = true;
 
     const receiptContainer = document.getElementById('receipt-container');
-    receiptContainer.style.display = 'block';
 
     const filename = `Nexus_Store_Bill_${Date.now()}.pdf`;
     const opt = {
@@ -487,8 +486,6 @@ btnCheckout.addEventListener('click', () => {
 
     // Generate PDF, convert to base64, upload to Drive, then WhatsApp.
     html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
-        receiptContainer.style.display = ''; // reset to normal hidden state
-
         // Prepare the payload for Apps Script
         const payload = JSON.stringify({
             base64: pdfBase64,

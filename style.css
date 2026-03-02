@@ -29,9 +29,6 @@ body {
         radial-gradient(circle at 85% 30%, rgba(46, 160, 67, 0.06) 0%, transparent 50%);
     color: var(--text-primary);
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 2rem;
 }
 
@@ -43,6 +40,9 @@ body {
     width: 100%;
     max-width: 1400px;
     height: 90vh;
+    margin: 0 auto;
+    align-items: center;
+    /* keep inner elements aligned if needed */
 }
 
 /* Glass Panels */
@@ -545,7 +545,9 @@ tr:hover td {
    Hidden by default, visible only on print
    ------------------------------------------- */
 .receipt-print-area {
-    display: none;
+    position: absolute;
+    left: -9999px;
+    top: 0;
     background: #fff;
     color: #000;
     width: 80mm;
