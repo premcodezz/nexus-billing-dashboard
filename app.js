@@ -242,9 +242,16 @@ btnCameraScan.addEventListener('click', () => {
 
         html5QrCode.start(cameraConfig, config,
             (decodedText, decodedResult) => {
-                // Success Callback
+                // Success Callback: Just put the text in the box and stop scanning.
                 console.log(`Scan result: ${decodedText}`);
-                processScan(decodedText.toLowerCase());
+
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => {
+                        resetCameraUI();
+                        scannerInput.value = decodedText.toLowerCase();
+                        // We DO NOT auto-submit or validate here as requested by the user.
+                    }).catch(err => console.error(err));
+                }
             },
             (errorMessage) => {
                 // Parse errors constantly thrown when no barcode is in front of the camera
@@ -259,7 +266,14 @@ btnCameraScan.addEventListener('click', () => {
             if (err.name === 'OverconstrainedError' || String(err).includes('OverconstrainedError')) {
                 console.warn("Rear camera not found, trying any available camera...");
                 html5QrCode.start({ facingMode: "user" }, config,
-                    (txt) => processScan(txt.toLowerCase()),
+                    (txt) => {
+                        if (html5QrCode) {
+                            html5QrCode.stop().then(() => {
+                                resetCameraUI();
+                                scannerInput.value = txt.toLowerCase();
+                            }).catch(err => console.error(err));
+                        }
+                    },
                     (e) => { }
                 ).then(() => {
                     isScanning = true;
