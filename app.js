@@ -168,14 +168,31 @@ scannerInput.addEventListener('keydown', (e) => {
     }
 });
 
+let lastScannedIsbn = '';
+let lastScanTime = 0;
+
 function processScan(isbn) {
+    const now = Date.now();
+
+    // Prevent rapid duplicate scans of the same barcode within 2 seconds
+    if (isbn === lastScannedIsbn && (now - lastScanTime) < 2000) {
+        return;
+    }
+
+    lastScannedIsbn = isbn;
+    lastScanTime = now;
+
+    // Show the user exactly what characters the scanner just read
+    scannerInput.value = isbn;
+
     const product = database.get(isbn);
     if (product) {
         addToCart(product);
-        // Provide audio/visual feedback if needed here
+        scannerInput.style.borderColor = 'var(--success-color)';
+        setTimeout(() => scannerInput.style.borderColor = 'var(--border-color)', 500);
     } else {
-        // Optional: Show brief toaster/error or just flash red
         scannerInput.style.borderColor = 'var(--danger-color)';
+        alert(`Scanned barcode "${isbn}" but could not find it in the Database.\n\nPlease check the Google Sheet.`);
         setTimeout(() => scannerInput.style.borderColor = 'var(--border-color)', 500);
     }
 }
