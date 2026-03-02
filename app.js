@@ -476,6 +476,10 @@ btnCheckout.addEventListener('click', () => {
     // Ensure scroll is at top so html2canvas doesn't render an empty off-screen box
     window.scrollTo(0, 0);
     const receiptContainer = document.getElementById('receipt-container');
+    const appContainer = document.querySelector('.app-container');
+
+    // Hide the entire app so ONLY the receipt exists in the DOM visual tree
+    if (appContainer) appContainer.style.display = 'none';
     receiptContainer.style.display = 'block';
 
     const filename = `Nexus_Store_Bill_${Date.now()}.pdf`;
@@ -498,6 +502,7 @@ btnCheckout.addEventListener('click', () => {
         // Generate PDF, convert to base64, upload to Drive, then redirect the WhatsApp Tab.
         html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
             receiptContainer.style.display = ''; // reset to normal hidden state
+            if (appContainer) appContainer.style.display = ''; // Restore the main app
 
             // Prepare the payload for Apps Script
             const payload = JSON.stringify({
@@ -542,6 +547,7 @@ btnCheckout.addEventListener('click', () => {
                 alert(`Failed to upload the bill to Google Drive. Error: ${error.message}\nCheck the console for details.`);
             })
             .finally(() => {
+                if (appContainer) appContainer.style.display = ''; // Safety fallback to restore UI
                 btnText.classList.remove('hidden');
                 loader.classList.add('hidden');
                 btnCheckout.disabled = false;
