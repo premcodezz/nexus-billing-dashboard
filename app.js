@@ -10,6 +10,7 @@ const scannerInput = document.getElementById('scanner-input');
 const btnCameraScan = document.getElementById('btn-camera-scan');
 const cameraBtnText = document.getElementById('camera-btn-text');
 const cartBody = document.getElementById('cart-body');
+const readerDiv = document.getElementById('reader');
 const btnClear = document.getElementById('btn-clear');
 const btnCheckout = document.getElementById('btn-checkout');
 const subtotalVal = document.getElementById('subtotal-val');
@@ -97,10 +98,12 @@ function setDisconnectedState() {
     syncStatusDot.classList.remove('connected');
     scannerInput.disabled = true;
     btnCameraScan.disabled = true;
-    if (html5QrcodeScanner) {
-        html5QrcodeScanner.clear();
-        isScanning = false;
-        cameraBtnText.textContent = "Scan with Camera";
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            isScanning = false;
+            cameraBtnText.textContent = "Scan with Camera";
+            readerDiv.style.display = 'none';
+        }).catch(err => console.log(err));
     }
 }
 
@@ -178,48 +181,62 @@ function processScan(isbn) {
 }
 
 /**
- * Camera Scanner Integration (html5-qrcode)
+ * Camera Scanner Integration (html5-qrcode direct API)
  */
-let html5QrcodeScanner = null;
+let html5QrCode = null;
 let isScanning = false;
 
 btnCameraScan.addEventListener('click', () => {
     if (isScanning) {
         // Stop scanning
-        if (html5QrcodeScanner) {
-            html5QrcodeScanner.clear().then(() => {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
                 isScanning = false;
                 cameraBtnText.textContent = "Scan with Camera";
                 btnCameraScan.style.borderColor = "var(--border-color)";
                 btnCameraScan.style.color = "var(--text-primary)";
+                readerDiv.style.display = 'none';
             }).catch(err => {
-                console.error("Failed to clear scanner", err);
+                console.error("Failed to stop scanner", err);
             });
         }
     } else {
         // Start scanning
         btnCameraScan.style.borderColor = "var(--success-color)";
         btnCameraScan.style.color = "var(--success-color)";
-        cameraBtnText.textContent = "Stop Camera";
-        isScanning = true;
+        cameraBtnText.textContent = "Starting Camera...";
 
-        if (!html5QrcodeScanner) {
-            html5QrcodeScanner = new Html5QrcodeScanner(
-                "reader",
-                { fps: 10, qrbox: { width: 250, height: 150 }, disableFlip: false },
-                false);
+        readerDiv.style.display = 'block';
+
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode("reader");
         }
 
-        html5QrcodeScanner.render((decodedText, decodedResult) => {
-            // Success Callback
-            console.log(`Scan result: ${decodedText}`);
+        const config = { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 };
 
-            // html5-qrcode scans fast, adding a small timeout/debounce might be needed if users scan duplicate items too quickly,
-            // but for a POS, aggressive cart-adding is usually desired.
-            processScan(decodedText.toLowerCase());
+        html5QrCode.start({ facingMode: "environment" }, config,
+            (decodedText, decodedResult) => {
+                // Success Callback
+                console.log(`Scan result: ${decodedText}`);
+                processScan(decodedText.toLowerCase());
 
-        }, (errorMessage) => {
-            // Ignored, continuous scanning throws errors constantly as it searches for shapes
+                // Optional: Auto-stop after 1 successful scan if desired
+                // btnCameraScan.click(); 
+            },
+            (errorMessage) => {
+                // Parse errors constantly thrown when no barcode is in front of the camera
+            }
+        ).then(() => {
+            isScanning = true;
+            cameraBtnText.textContent = "Stop Camera";
+        }).catch((err) => {
+            console.error("Error launching camera:", err);
+            alert("Could not start camera. Please ensure you have granted camera permissions for this site.");
+            btnCameraScan.style.borderColor = "var(--border-color)";
+            btnCameraScan.style.color = "var(--text-primary)";
+            cameraBtnText.textContent = "Scan with Camera";
+            readerDiv.style.display = 'none';
+            isScanning = false;
         });
     }
 });
