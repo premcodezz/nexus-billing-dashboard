@@ -476,29 +476,129 @@ btnCheckout.addEventListener('click', () => {
     const receiptContainer = document.getElementById('receipt-container');
 
     const filename = `Nexus_Store_Bill_${Date.now()}.pdf`;
-    const opt = {
-        margin: 5,
+
+    // 1. Initialize pure jsPDF document (80mm width thermal layout, independent of HTML DOM)
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [80, 200]
+    });
+
+    let y = 10;
+
+    // Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("THE COFFEE HOUSE", 40, y, { align: "center" });
+    y += 5;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("123 Tech Avenue, Silicon Valley", 40, y, { align: "center" });
+    y += 4;
+    doc.text("Tel: +1 555-0199", 40, y, { align: "center" });
+    y += 4;
+
+    // Draw Divider
+    doc.setLineWidth(0.5);
+    doc.line(5, y, 75, y);
+    y += 5;
+
+    doc.setFont("helvetica", "bold");
+    doc.text(`RECEIPT: ${document.getElementById('receipt-id').textContent}`, 40, y, { align: "center" });
+    y += 5;
+
+    doc.setFont("helvetica", "normal");
+    const rDate = document.getElementById('receipt-date-val').textContent;
+    const rTime = document.getElementById('receipt-time-val').textContent;
+    doc.text(`Date: ${rDate}`, 5, y);
+    doc.text(`Time: ${rTime}`, 75, y, { align: "right" });
+    y += 4;
+
+    // Draw Divider
+    doc.line(5, y, 75, y);
+    y += 5;
+
+    // Table Header
+    doc.setFont("helvetica", "bold");
+    doc.text("Item", 5, y);
+    doc.text("Qty", 55, y, { align: "right" });
+    doc.text("Price", 75, y, { align: "right" });
+    y += 2;
+    doc.line(5, y, 75, y);
+    y += 5;
+
+    // Table Items
+    doc.setFont("helvetica", "normal");
+    cart.forEach((item) => {
+        const itemTotal = item.price * item.qty;
+        doc.text(item.name.substring(0, 16), 5, y);
+        doc.text(String(item.qty), 55, y, { align: "right" });
+        doc.text(formatMoney(itemTotal), 75, y, { align: "right" });
+        y += 5;
+    });
+
+    // Draw Divider
+    y -= 2;
+    doc.line(5, y, 75, y);
+    y += 5;
+
+    // Totals
+    doc.text(`Subtotal: ${formatMoney(tSubtotal)}`, 75, y, { align: "right" });
+    y += 5;
+    doc.text(`Tax (10%): ${formatMoney(tTax)}`, 75, y, { align: "right" });
+    y += 5;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text(`TOTAL: ${formatMoney(tTotal)}`, 75, y, { align: "right" });
+    y += 5;
+
+    // Draw Divider
+    doc.setLineWidth(0.5);
+    doc.line(5, y, 75, y);
+    y += 6;
+
+    // Footer
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("Thank you for your visit!", 40, y, { align: "center" });
+    y += 4;
+    doc.text("Follow us on IG: @TheCoffeeHouse", 40, y, { align: "center" });
+    y += 6;
+
+    // "QR Code" box proxy
+    doc.rect(32.5, y, 15, 15);
+    y += 18;
+
+    doc.setFontSize(7);
+    doc.text("Scan for Loyalty Points", 40, y, { align: "center" });
+
+    // 2. Render synchronous document 
+    const pdfBase64 = doc.output('datauristring');
+
+    // 3. Strict Check: Ensure PDF Generated safely
+    if (!pdfBase64 || pdfBase64.length < 1000) {
+        alert("CRITICAL ERROR: Failed to generate PDF layout.");
+        btnText.classList.remove('hidden');
+        loader.classList.add('hidden');
+        btnCheckout.disabled = false;
+        return;
+    }
+
+    // 4. Prepare the payload for Apps Script
+    const payload = JSON.stringify({
+        base64: pdfBase64,
         filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' }
-    };
+        folderId: '15QEZhWbjviHTUYW5XUtvP8E-i4xPtC8e'
+    });
 
-    // Generate PDF, convert to base64, upload to Drive, then WhatsApp.
-    html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
-        // Prepare the payload for Apps Script
-        const payload = JSON.stringify({
-            base64: pdfBase64,
-            filename: filename,
-            folderId: '15QEZhWbjviHTUYW5XUtvP8E-i4xPtC8e'
-        });
-
-        // Send simple POST request without custom headers to avoid CORS preflight entirely.
-        // Google Apps Script will parse this payload in e.postData.contents.
-        return fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: payload
-        });
+    // Send simple POST request without custom headers to avoid CORS preflight entirely.
+    // Google Apps Script will parse this payload in e.postData.contents.
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: payload
     })
         .then(response => {
             // Apps script often responds with a redirect (302) on POST before giving JSON, 
