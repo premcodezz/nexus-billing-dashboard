@@ -473,17 +473,6 @@ btnCheckout.addEventListener('click', () => {
     loader.classList.remove('hidden');
     btnCheckout.disabled = true;
 
-    // WORKAROUND FOR MOBILE POPUP BLOCKERS:
-    // Mobile browsers (Safari/Chrome) aggressively block `window.open` if it occurs 
-    // *after* an asynchronous callback (like waiting for a fetch/upload to finish).
-    // The solution is to open a blank tab synchronously right here on the trusted click event, 
-    // keep a reference to it, and redirect it later.
-    const whatsappTab = window.open('about:blank', '_blank');
-    if (whatsappTab) {
-        // Optional: show a loading message in the new tab
-        whatsappTab.document.write('<h2>Generating bill and connecting to WhatsApp...</h2>');
-    }
-
     // Ensure scroll is at top so html2canvas doesn't render an empty off-screen box
     window.scrollTo(0, 0);
     const receiptContainer = document.getElementById('receipt-container');
@@ -535,13 +524,8 @@ btnCheckout.addEventListener('click', () => {
                     const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
                     const waLink = `https://wa.me/${cleanPhone}?text=${message}`;
 
-                    // 1. Redirect the previously opened tab to WhatsApp
-                    if (whatsappTab) {
-                        whatsappTab.location.href = waLink;
-                    } else {
-                        // Fallback if the popup was completely blocked initially
-                        window.open(waLink, '_blank');
-                    }
+                    // Redirect the current tab to WhatsApp to avoid iOS background tab suspension
+                    window.location.href = waLink;
 
                 } else {
                     throw new Error(result.message || 'Unknown error during upload');
@@ -550,11 +534,6 @@ btnCheckout.addEventListener('click', () => {
             .catch(error => {
                 console.error("Upload Error:", error);
                 alert(`Failed to upload the bill to Google Drive. Error: ${error.message}\nCheck the console for details.`);
-
-                // Close the empty tab if an error occurred to avoid leaving the user with a blank page
-                if (whatsappTab) {
-                    whatsappTab.close();
-                }
             })
             .finally(() => {
                 btnText.classList.remove('hidden');
