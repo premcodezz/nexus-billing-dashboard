@@ -484,6 +484,8 @@ btnCheckout.addEventListener('click', () => {
         whatsappTab.document.write('<h2>Generating bill and connecting to WhatsApp...</h2>');
     }
 
+    // Ensure scroll is at top so html2canvas doesn't render an empty off-screen box
+    window.scrollTo(0, 0);
     const receiptContainer = document.getElementById('receipt-container');
     receiptContainer.style.display = 'block';
 
