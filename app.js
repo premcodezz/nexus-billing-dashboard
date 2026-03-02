@@ -214,14 +214,14 @@ btnCameraScan.addEventListener('click', () => {
 
         const config = { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 };
 
-        html5QrCode.start({ facingMode: "environment" }, config,
+        // iOS Safari strict WebRTC Requirements
+        const cameraConfig = { facingMode: { exact: "environment" } };
+
+        html5QrCode.start(cameraConfig, config,
             (decodedText, decodedResult) => {
                 // Success Callback
                 console.log(`Scan result: ${decodedText}`);
                 processScan(decodedText.toLowerCase());
-
-                // Optional: Auto-stop after 1 successful scan if desired
-                // btnCameraScan.click(); 
             },
             (errorMessage) => {
                 // Parse errors constantly thrown when no barcode is in front of the camera
@@ -231,15 +231,35 @@ btnCameraScan.addEventListener('click', () => {
             cameraBtnText.textContent = "Stop Camera";
         }).catch((err) => {
             console.error("Error launching camera:", err);
-            alert("Could not start camera. Please ensure you have granted camera permissions for this site.");
-            btnCameraScan.style.borderColor = "var(--border-color)";
-            btnCameraScan.style.color = "var(--text-primary)";
-            cameraBtnText.textContent = "Scan with Camera";
-            readerDiv.style.display = 'none';
-            isScanning = false;
+
+            // Fallback for devices without a rear camera (e.g., some laptops or older iPads)
+            if (err.name === 'OverconstrainedError' || String(err).includes('OverconstrainedError')) {
+                console.warn("Rear camera not found, trying any available camera...");
+                html5QrCode.start({ facingMode: "user" }, config,
+                    (txt) => processScan(txt.toLowerCase()),
+                    (e) => { }
+                ).then(() => {
+                    isScanning = true;
+                    cameraBtnText.textContent = "Stop Camera";
+                }).catch(e => {
+                    alert("Could not start any camera. Permissions might be denied.");
+                    resetCameraUI();
+                });
+            } else {
+                alert(`Camera access denied or unavailable.\n\nSafari Users: Go to Settings > Safari > Settings for Websites > Camera and ensure it is set to "Allow".\n\nError: ${err.message || err.name || err}`);
+                resetCameraUI();
+            }
         });
     }
 });
+
+function resetCameraUI() {
+    btnCameraScan.style.borderColor = "var(--border-color)";
+    btnCameraScan.style.color = "var(--text-primary)";
+    cameraBtnText.textContent = "Scan with Camera";
+    readerDiv.style.display = 'none';
+    isScanning = false;
+}
 
 /**
  * Cart Logic
