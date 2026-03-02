@@ -500,8 +500,8 @@ btnCheckout.addEventListener('click', () => {
 
     // Small timeout to allow the browser to fully render the display:block before snapshotting
     setTimeout(() => {
-        // Generate PDF, save it locally, convert to base64, upload to Drive, then redirect the WhatsApp Tab.
-        html2pdf().set(opt).from(receiptContainer).save().output('datauristring').then(function (pdfBase64) {
+        // Generate PDF, convert to base64, upload to Drive, then redirect the WhatsApp Tab.
+        html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
             receiptContainer.style.display = ''; // reset to normal hidden state
 
             // Prepare the payload for Apps Script
