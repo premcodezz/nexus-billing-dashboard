@@ -226,10 +226,25 @@ btnCameraScan.addEventListener('click', () => {
         readerDiv.style.display = 'block';
 
         if (!html5QrCode) {
-            html5QrCode = new Html5Qrcode("reader");
+            // Explicitly defining formats increases scanning reliability and speed
+            const formatsToSupport = [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.QR_CODE
+            ];
+            html5QrCode = new Html5Qrcode("reader", { formatsToSupport: formatsToSupport });
         }
 
-        const config = { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 };
+        const config = {
+            fps: 15,          // Increased FPS for faster scanning
+            qrbox: { width: 250, height: 150 },
+            aspectRatio: 1.0,
+            disableFlip: false
+        };
 
         // iOS Safari strict WebRTC Requirements
         const cameraConfig = { facingMode: { exact: "environment" } };
