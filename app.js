@@ -585,10 +585,19 @@ btnCheckout.addEventListener('click', () => {
     }
 
     // 4. Prepare the payload for Apps Script
+    // Strip all non-digits for the sheet log and whatsapp link
+    let cleanPhone = phoneInput.replace(/\D/g, '');
+    if (cleanPhone.length > 10) {
+        cleanPhone = cleanPhone.slice(-10);
+    }
+    const waPhone = '91' + cleanPhone;
+
     const payload = JSON.stringify({
         base64: pdfBase64,
         filename: filename,
-        folderId: '15QEZhWbjviHTUYW5XUtvP8E-i4xPtC8e'
+        folderId: '15QEZhWbjviHTUYW5XUtvP8E-i4xPtC8e',
+        phone: waPhone,
+        totalAmount: tTotal
     });
 
     // Send simple POST request without custom headers to avoid CORS preflight entirely.
@@ -610,16 +619,6 @@ btnCheckout.addEventListener('click', () => {
                 // Result MUST have .url from our script
                 console.log("Upload Success! URL:", result.url);
 
-                // Strip all non-digits
-                let cleanPhone = phoneInput.replace(/\D/g, '');
-
-                // If the user mistakenly included the country code '91' or '0' at the start, slice it so we only get the core 10 digits
-                if (cleanPhone.length > 10) {
-                    cleanPhone = cleanPhone.slice(-10);
-                }
-
-                // Force India country code
-                const waPhone = '91' + cleanPhone;
                 const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
                 const waLink = `https://api.whatsapp.com/send/?phone=${waPhone}&text=${message}`;
 
