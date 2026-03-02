@@ -481,65 +481,68 @@ btnCheckout.addEventListener('click', () => {
         jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' }
     };
 
-    // Generate PDF, convert to base64, upload to Drive, then redirect the WhatsApp Tab.
-    html2pdf().set(opt).from(receiptContainer).output('datauristring').then(function (pdfBase64) {
-        receiptContainer.style.display = ''; // reset to normal hidden state
+    // Small timeout to allow the browser to fully render the display:block before snapshotting
+    setTimeout(() => {
+        // Generate PDF, save it locally, convert to base64, upload to Drive, then redirect the WhatsApp Tab.
+        html2pdf().set(opt).from(receiptContainer).save().output('datauristring').then(function (pdfBase64) {
+            receiptContainer.style.display = ''; // reset to normal hidden state
 
-        // Prepare the payload for Apps Script
-        const payload = JSON.stringify({
-            base64: pdfBase64,
-            filename: filename,
-            folderId: '15QEZhWbjviHTUYW5XUtvP8E-i4xPtC8e'
-        });
+            // Prepare the payload for Apps Script
+            const payload = JSON.stringify({
+                base64: pdfBase64,
+                filename: filename,
+                folderId: '15QEZhWbjviHTUYW5XUtvP8E-i4xPtC8e'
+            });
 
-        // Send simple POST request without custom headers to avoid CORS preflight entirely.
-        // Google Apps Script will parse this payload in e.postData.contents.
-        return fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: payload
-        });
-    })
-        .then(response => {
-            // Apps script often responds with a redirect (302) on POST before giving JSON, 
-            // but the fetch API transparently follows it. We just need to parse the final response.
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
+            // Send simple POST request without custom headers to avoid CORS preflight entirely.
+            // Google Apps Script will parse this payload in e.postData.contents.
+            return fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: payload
+            });
         })
-        .then(result => {
-            if (result.status === 'success') {
-                // Result MUST have .url from our script
-                console.log("Upload Success! URL:", result.url);
-
-                const cleanPhone = phoneInput.replace(/\D/g, '');
-                const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
-                const waLink = `https://wa.me/${cleanPhone}?text=${message}`;
-
-                // 1. Redirect the previously opened tab to WhatsApp
-                if (whatsappTab) {
-                    whatsappTab.location.href = waLink;
-                } else {
-                    // Fallback if the popup was completely blocked initially
-                    window.open(waLink, '_blank');
+            .then(response => {
+                // Apps script often responds with a redirect (302) on POST before giving JSON, 
+                // but the fetch API transparently follows it. We just need to parse the final response.
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response.json();
+            })
+            .then(result => {
+                if (result.status === 'success') {
+                    // Result MUST have .url from our script
+                    console.log("Upload Success! URL:", result.url);
 
-            } else {
-                throw new Error(result.message || 'Unknown error during upload');
-            }
-        })
-        .catch(error => {
-            console.error("Upload Error:", error);
-            alert(`Failed to upload the bill to Google Drive. Error: ${error.message}\nCheck the console for details.`);
+                    const cleanPhone = phoneInput.replace(/\D/g, '');
+                    const message = encodeURIComponent(`Hello! Thank you for your purchase from Nexus Store.\n\nPlease find your digital bill here: ${result.url}`);
+                    const waLink = `https://wa.me/${cleanPhone}?text=${message}`;
 
-            // Close the empty tab if an error occurred to avoid leaving the user with a blank page
-            if (whatsappTab) {
-                whatsappTab.close();
-            }
-        })
-        .finally(() => {
-            btnText.classList.remove('hidden');
-            loader.classList.add('hidden');
-            btnCheckout.disabled = false;
-        });
+                    // 1. Redirect the previously opened tab to WhatsApp
+                    if (whatsappTab) {
+                        whatsappTab.location.href = waLink;
+                    } else {
+                        // Fallback if the popup was completely blocked initially
+                        window.open(waLink, '_blank');
+                    }
+
+                } else {
+                    throw new Error(result.message || 'Unknown error during upload');
+                }
+            })
+            .catch(error => {
+                console.error("Upload Error:", error);
+                alert(`Failed to upload the bill to Google Drive. Error: ${error.message}\nCheck the console for details.`);
+
+                // Close the empty tab if an error occurred to avoid leaving the user with a blank page
+                if (whatsappTab) {
+                    whatsappTab.close();
+                }
+            })
+            .finally(() => {
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
+                btnCheckout.disabled = false;
+            });
+    }, 100);
 });

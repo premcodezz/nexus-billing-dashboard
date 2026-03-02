@@ -552,8 +552,74 @@ tr:hover td {
     font-size: 12px;
     padding: 0;
     width: 80mm;
-    /* Standard thermal printer width */
     margin: 0 auto;
+}
+
+/* Make sure all receipt styles are GLOBAL so html2pdf can capture them correctly before printing */
+.receipt-print-area {
+    background: #fff;
+    color: #000;
+    width: 100%;
+    max-width: 80mm;
+    margin: 0;
+    padding: 5mm;
+}
+
+.receipt-header {
+    text-align: center;
+    margin-bottom: 5mm;
+    border-bottom: 1px dashed #000;
+    padding-bottom: 3mm;
+}
+
+.receipt-header h2 {
+    font-size: 18px;
+    margin: 0 0 2mm 0;
+}
+
+.receipt-header p {
+    margin: 0 0 1mm 0;
+    font-size: 10px;
+}
+
+.receipt-table {
+    width: 100%;
+    margin-bottom: 3mm;
+}
+
+.receipt-table th {
+    border-bottom: 1px dashed #000;
+    padding: 2mm 0;
+    font-size: 10px;
+    color: #000;
+    background: none;
+}
+
+.receipt-table td {
+    padding: 2mm 0;
+    border: none;
+    font-size: 10px;
+}
+
+.receipt-totals {
+    border-top: 1px dashed #000;
+    padding-top: 3mm;
+    margin-bottom: 5mm;
+}
+
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 1mm 0;
+}
+
+.receipt-footer {
+    text-align: center;
+    border-top: 1px dashed #000;
+    padding-top: 3mm;
+    font-size: 10px;
 }
 
 @media print {
@@ -571,67 +637,6 @@ tr:hover td {
     /* Show only standard black/white thermal receipt format */
     .receipt-print-area {
         display: block;
-        width: 100%;
-        max-width: 80mm;
-        margin: 0;
-        padding: 5mm;
-    }
-
-    .receipt-header {
-        text-align: center;
-        margin-bottom: 5mm;
-        border-bottom: 1px dashed #000;
-        padding-bottom: 3mm;
-    }
-
-    .receipt-header h2 {
-        font-size: 18px;
-        margin: 0 0 2mm 0;
-    }
-
-    .receipt-header p {
-        margin: 0 0 1mm 0;
-        font-size: 10px;
-    }
-
-    .receipt-table {
-        width: 100%;
-        margin-bottom: 3mm;
-    }
-
-    .receipt-table th {
-        border-bottom: 1px dashed #000;
-        padding: 2mm 0;
-        font-size: 10px;
-        color: #000;
-        background: none;
-    }
-
-    .receipt-table td {
-        padding: 2mm 0;
-        border: none;
-        font-size: 10px;
-    }
-
-    .receipt-totals {
-        border-top: 1px dashed #000;
-        padding-top: 3mm;
-        margin-bottom: 5mm;
-    }
-
-    .receipt-row {
-        display: flex;
-        justify-content: space-between;
-        font-weight: bold;
-        font-size: 14px;
-        padding: 1mm 0;
-    }
-
-    .receipt-footer {
-        text-align: center;
-        border-top: 1px dashed #000;
-        padding-top: 3mm;
-        font-size: 10px;
     }
 
     @page {
